@@ -1,5 +1,4 @@
 <?php
-// Start the session to access $_SESSION variables
 session_start();
 
 // Check if the user is logged in; redirect to login page if not
@@ -19,7 +18,7 @@ if (!$con) {
     die("Database connection failed: " . $con->errorInfo()[2]);
 }
 
-// Fetch colleges and handle dropdowns based on user role
+// Get filters
 $collegeFilter = isset($_GET['college']) ? $_GET['college'] : null;
 $departmentFilter = isset($_GET['department']) ? $_GET['department'] : null;
 $sectionFilter = isset($_GET['section']) ? $_GET['section'] : null;
@@ -77,13 +76,10 @@ $statement->execute();
             min-width: 150px;
         }
 
-        .btn-import {
-            margin-left: 15px;
-        }
-        
         .filter-container {
             display: flex;
             gap: 10px;
+            margin-bottom: 20px;
         }
 
         .form-select {
@@ -105,34 +101,32 @@ $statement->execute();
             <?php include "component/header.php"; ?>
             <div class="alumni-list-header d-flex justify-content-between align-items-center py-2">
                 <div class="title h6 fw-bold">Alumni List</div>
-                <div class="btn-add d-flex gap-3 align-items-center">
-                    <button class="btn btn-primary btn-wide" data-bs-toggle="modal" data-bs-target="#importModal">Import Alumni</button>
-                    <?php include 'importmodal.php'; ?>
+                <div class="btn-add">
                     <?php include 'alumni_add.php'; ?>
                 </div>
             </div>
 
             <!-- Filtering Dropdowns -->
-            <div class="filter-container mb-3">
-                <?php if (in_array($_SESSION['user_role'], ['Admin', 'Registrar', 'Dean', 'Program Chair'])): ?>
-                    <select id="collegeFilter" class="form-select" onchange="applyFilters()">
-                        <option value="">Select College</option>
-                        <?php foreach ($colleges as $college): ?>
-                            <option value="<?= htmlspecialchars($college, ENT_QUOTES, 'UTF-8') ?>" <?= ($college === $collegeFilter) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($college, ENT_QUOTES, 'UTF-8') ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                <?php endif; ?>
+            <div class="filter-container">
+                <select id="collegeFilter" class="form-select" onchange="applyFilters()">
+                    <option value="">Select College</option>
+                    <?php foreach ($colleges as $college): ?>
+                        <option value="<?= htmlspecialchars($college, ENT_QUOTES, 'UTF-8') ?>" <?= ($college === $collegeFilter) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($college, ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
                 <select id="departmentFilter" class="form-select" onchange="applyFilters()">
                     <option value="">Select Department</option>
                 </select>
+
                 <select id="sectionFilter" class="form-select" onchange="applyFilters()">
                     <option value="">Select Section</option>
                 </select>
             </div>
 
+            <!-- Alumni Table -->
             <div class="table-responsive table-container">
                 <table class="table alumni_list table-borderless">
                     <thead>
@@ -188,17 +182,16 @@ $statement->execute();
             </div>
         </div>
     </main>
-    <script src="../assets/js/bootstrap.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const collegeSelect = document.getElementById('collegeFilter');
             const departmentSelect = document.getElementById('departmentFilter');
             const sectionSelect = document.getElementById('sectionFilter');
 
-            // Initialize the department and section dropdowns
             updateDepartments(collegeSelect.value, "<?= htmlspecialchars($departmentFilter ?? '') ?>", "<?= htmlspecialchars($sectionFilter ?? '') ?>");
 
-            // Event listeners for dropdown changes
             collegeSelect.addEventListener('change', function() {
                 updateDepartments(this.value, '', '');
             });
@@ -226,7 +219,6 @@ $statement->execute();
                             departmentSelect.appendChild(option);
                         });
                         departmentSelect.value = selectedDepartment;
-
                         updateSections(departmentSelect.value, selectedSection);
                     })
                     .catch(error => console.error('Error fetching departments:', error));
@@ -235,7 +227,6 @@ $statement->execute();
 
         function updateSections(department, selectedSection) {
             const sectionSelect = document.getElementById('sectionFilter');
-
             sectionSelect.innerHTML = '<option value="">Select Section</option>';
 
             if (department) {
@@ -258,11 +249,13 @@ $statement->execute();
             const college = document.getElementById('collegeFilter').value;
             const department = document.getElementById('departmentFilter').value;
             const section = document.getElementById('sectionFilter').value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('college', college);
-            url.searchParams.set('department', department);
-            url.searchParams.set('section', section);
-            window.location.href = url.toString();
+
+            const params = new URLSearchParams();
+            if (college) params.append('college', college);
+            if (department) params.append('department', department);
+            if (section) params.append('section', section);
+
+            window.location.search = params.toString();
         }
     </script>
 </body>
