@@ -7,15 +7,15 @@ include '../connection.php';
 function checkUserPrivileges($userRole) {
     switch ($userRole) {
         case 'Admin':
-            return ['home.php', 'alumni_list.php', 'courses.php', 'staffs.php']; // Admin can access all
+            return ['home.php', 'alumni_list.php', 'courses.php']; // Admin can access all
         case 'Registrar':
             return ['home.php', 'alumni_list.php', 'courses.php']; // Registrar access
         case 'Dean':
-            return ['alumni_list.php']; // Dean access
+            return ['dean_list.php']; // Dean access
         case 'Program Chair':
-            return ['alumni_list.php']; // Program Chair access
+            return ['programchair_list.php']; // Program Chair access
         case 'Alumni':
-            return ['alumni_list.php']; // Alumni access
+                return ['alumni_home.php', 'edit_form.php'];
         default:
             return []; // No access
     }
