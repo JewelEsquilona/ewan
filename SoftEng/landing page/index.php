@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 session_start(); // Start the session
 include '../connection.php';
 include '../dashboard/user_privileges.php';
@@ -7,7 +11,7 @@ include '../dashboard/user_privileges.php';
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
-    header('Location: login.php');
+    header('Location: index.php');
     exit();
 }
 
@@ -16,8 +20,6 @@ if (isset($_SESSION['user_id'])) {
     header('Location: ../dashboard/home.php');
     exit();
 }
-
-// Login form handling
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['pass'];
@@ -39,9 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
                 session_regenerate_id(true); // Regenerate session ID for security
                 // Store user session details
                 $_SESSION['user_id'] = $result['id'];
-                $_SESSION['user_name'] = $result['name']; // Optional: Add more user info if needed
-                $_SESSION['user_role'] = $result['role'];
-
+                $_SESSION['user_name'] = $result['name'] ?? '';
+                $_SESSION['user_role'] = $result['role'] ?? '';
+                $_SESSION['user_college'] = $result['college'] ?? 'N/A';
+                $_SESSION['user_department'] = $result['department'] ?? 'N/A';
+                $_SESSION['alumni_id'] = $result['Alumni_ID_Number'] ?? null; 
+                
                 // Redirect to home page
                 header('Location: ../dashboard/home.php');
                 exit();
@@ -54,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_submit'])) {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
