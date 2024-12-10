@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Redirect to index.php after successful registration
                 echo "<script>
                         alert('Registration successful! Redirecting to login page.');
-                        window.location.href='index.php';
+                        window.location.href='../index.php';
                       </script>";
                 exit; // Ensure no further code is executed
             } else {
@@ -133,10 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .text-center {
             margin-top: 15px;
         }
-
-        .valid {
-            color: red;
-        }
     </style>
 </head>
 
@@ -201,7 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <script src="../assets/js/bootstrap.bundle.js"></script>
-    <script src="../assets/js/validation.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const slides = document.querySelectorAll('.slider');
@@ -248,6 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Fetch departments based on selected college
             document.getElementById('college').addEventListener('change', function() {
                 const college = this.value;
+                const departmentContainer = document.getElementById('departmentContainer');
                 const departmentSelect = document.getElementById('department');
 
                 // Clear previous departments
@@ -257,21 +253,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     fetch(`../dashboard/get_departments.php?college=${encodeURIComponent(college)}`)
                         .then(response => response.json())
                         .then(data => {
+                            console.log('Fetched departments:', data); // Log the fetched data
                             data.forEach(department => {
                                 const option = document.createElement('option');
-                                option.value = department.department; // Ensure this matches your database field
-                                option.textContent = department.department; // Ensure this matches your database field
+                                option.value = department;
+                                option.textContent = department;
                                 departmentSelect.appendChild(option);
                             });
-                            // Show the department container only for Program Chair
-                            const role = document.querySelector('input[name="role"]:checked');
-                            if (role && role.value === 'Program Chair') {
-                                document.getElementById('departmentContainer').style.display = 'block';
-                            }
+                            departmentContainer.style.display = 'block'; // Show the department container
                         })
                         .catch(error => console.error('Error fetching departments:', error));
                 } else {
-                    document.getElementById('departmentContainer').style.display = 'none'; // Hide if no college selected
+                    departmentContainer.style.display = 'none'; // Hide if no college selected
                 }
             });
 
@@ -301,8 +294,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
     </script>
-
-
 </body>
 
 </html>
